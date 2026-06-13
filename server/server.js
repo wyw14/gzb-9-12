@@ -312,6 +312,68 @@ app.get('/api/exchanges/my', (req, res) => {
   res.json(myExchanges);
 });
 
+app.get('/api/stats', (req, res) => {
+  const items = readItems();
+  const exchanges = readExchanges();
+
+  const total = items.length;
+  const available = items.filter(i => i.status === 'available').length;
+  const exchanged = items.filter(i => i.status === 'exchanged').length;
+
+  const categoryMap = {
+    book: '书籍类',
+    figure: '手办类',
+    toy: '玩具类',
+    game: '游戏类',
+    digital: '数码类',
+    other: '其他'
+  };
+  const categoryCount = {};
+  items.forEach(item => {
+    const name = categoryMap[item.category] || item.category;
+    categoryCount[name] = (categoryCount[name] || 0) + 1;
+  });
+  const categoryRatio = Object.keys(categoryCount).map(name => ({
+    name,
+    value: categoryCount[name]
+  }));
+
+  const now = new Date();
+  const publishTrend = [];
+  const exchangeTrend = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(now);
+    d.setDate(d.getDate() - i);
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    const dateStr = `${y}-${m}-${day}`;
+    const label = `${m}-${day}`;
+
+    const publishCount = items.filter(item => {
+      const cd = new Date(item.createdAt);
+      return cd.getFullYear() === y && cd.getMonth() === d.getMonth() && cd.getDate() === d.getDate();
+    }).length;
+
+    const exchangeCount = exchanges.filter(ex => {
+      const cd = new Date(ex.createdAt);
+      return cd.getFullYear() === y && cd.getMonth() === d.getMonth() && cd.getDate() === d.getDate();
+    }).length;
+
+    publishTrend.push({ date: dateStr, label, count: publishCount });
+    exchangeTrend.push({ date: dateStr, label, count: exchangeCount });
+  }
+
+  res.json({
+    total,
+    available,
+    exchanged,
+    categoryRatio,
+    publishTrend,
+    exchangeTrend
+  });
+});
+
 app.delete('/api/items/:id', (req, res) => {
   const { id } = req.params;
   const { userId } = req.query;

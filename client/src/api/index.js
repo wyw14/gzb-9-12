@@ -41,3 +41,7 @@ export function createExchange(myItemId, targetItemId) {
 export function getMyExchanges(userId) {
   return api.get('/exchanges/my', { params: { userId } }).then(res => res.data)
 }
+
+export function getStats() {
+  return api.get('/stats').then(res => res.data)
+}
