@@ -45,7 +45,16 @@
       <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:20px;margin-bottom:24px;">
         <div class="card">
           <h3 style="margin-bottom:16px;color:#333;">分类占比</h3>
-          <div class="chart-box" ref="pieChartRef"></div>
+          <template v-if="stats.categoryRatio && stats.categoryRatio.length">
+            <div class="chart-box" ref="pieChartRef"></div>
+          </template>
+          <template v-else>
+            <div class="chart-empty">
+              <div style="font-size:48px;margin-bottom:12px;">📦</div>
+              <p style="color:#999;font-size:14px;">暂无分类数据</p>
+              <p style="color:#bbb;font-size:12px;margin-top:4px;">发布盲盒后将显示分类占比</p>
+            </div>
+          </template>
         </div>
 
         <div class="card">
@@ -249,7 +258,9 @@ function handleResize() {
 }
 
 function initAllCharts() {
-  initPieChart()
+  if (stats.value.categoryRatio && stats.value.categoryRatio.length > 0) {
+    initPieChart()
+  }
   initPublishChart()
   initExchangeChart()
   setTimeout(() => {
@@ -302,5 +313,15 @@ onUnmounted(() => {
   min-height: 300px;
   min-width: 300px;
   overflow: hidden;
+}
+.chart-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 300px;
+  min-height: 300px;
+  background: linear-gradient(135deg, #fafbff 0%, #f5f0ff 100%);
+  border-radius: 12px;
 }
 </style>

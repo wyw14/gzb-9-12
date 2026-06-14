@@ -356,6 +356,7 @@ app.get('/api/stats', (req, res) => {
     }).length;
 
     const exchangeCount = exchanges.filter(ex => {
+      if (ex.status !== 'completed') return false;
       const cd = new Date(ex.createdAt);
       return cd.getFullYear() === y && cd.getMonth() === d.getMonth() && cd.getDate() === d.getDate();
     }).length;
